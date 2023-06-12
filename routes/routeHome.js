@@ -62,3 +62,12 @@ router.get('/logout', function (req, res) {
 });
 
 module.exports = router;
+
+
+// Creat account 
+router.get('/register', function(req, res){
+    res.render('register', {
+        test: { "abc": "mart" }
+    });
+});
+

@@ -10,11 +10,11 @@
     <div class="login-page">
         <div class="form">
             <% if(currentUser?.username) { %>
-                <%= currentUser?.username %> <a href="/logout">Logout</a>
+                <%= currentUser?.username %> <a href="/logout">로그아웃</a>
             <% } else { %>
-                <a href="/login">Login</a>
+                <a href="/register">회원가입</a>
+                <a href="/login">로그인</a>
             <% } %>
-            
         </div>
     </div>
 </body>
