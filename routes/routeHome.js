@@ -6,13 +6,6 @@ const modelUsers = require('../models/modelUsers');
 
 // Home
 router.get('/', async function (req, res) {
-    // const newUser = await modelUsers.create({
-    //     'username': 'cdabomi',
-    //     'password': '12',
-    //     'name': '싫은데.1..',
-    //     'passwordConfirmation': '12'
-    // });
-    // console.log('newUser', newUser);
     res.render('welcome', {
         test: {"abc" : "mart"}
     });
@@ -71,3 +64,21 @@ router.get('/register', function(req, res){
     });
 });
 
+router.post('/register', function(req,res) {
+    const { username, password, name, passwordConfirmation  } = req.body;
+    modelUsers.create({
+        username: username,
+        password: password,
+        name: name,
+        passwordConfirmation: passwordConfirmation
+    }).then(() => {
+        passport.authenticate('local-login', {
+            successRedirect: '/',
+            failureRedirect: '/login'
+        });
+        res.status(200).redirect('/login');
+    })
+    .catch((error) => {
+        res.status(500).send({ message: '에러가 발생했습니다: ' + error.message });
+    });
+});
