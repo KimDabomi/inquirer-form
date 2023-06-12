@@ -1,0 +1,105 @@
+<div id="menu_area" class="menu-area mb-3">
+    <div class="container">
+        <div class="row">
+            <nav class="navbar navbar-light navbar-expand-lg mainmenu">
+                <div class="navbar-brand"><a href="/" class="nav-link">CALLLINK ADMIN</a></div>
+                <button class="navbar-toggler mr-3" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <% if(isAuthenticated){ %>
+                            <% if(currentUser.username == 'admin'){ %>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">데이터 관리</a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a href="/default/templates">템플릿관리</a></li>
+                                        <li><a href="/default/famous">유명도메인</a></li>
+                                        <li><a href="/default/wordpress">WP계정관리</a></li>
+                                        <li><a href="/default/auto">자동화계정관리</a></li>
+                                        <li><a href="/default/indexed">색인WP관리</a></li>
+                                    </ul>
+                                </li>
+                            <% } %>
+                        <% } %>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">백링크 작업관리</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">WP 작업관리</a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <li><a href="/mgmt/wordpress">WP작업관리</a></li>
+                                        <li><a href="/mgmt/backlink/wordpress">WP백링크관리</a></li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">일반 작업관리</a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <% if(isAuthenticated){ %>
+                                            <% if(currentUser.username == 'admin'){ %>
+                                                <a href="/mgmt/normal">글 가져오기</a>
+                                                <a href="/mgmt/article/normal">일반 html</a>
+                                            <% } %>
+                                        <% } %>
+                                        <a href="/mgmt/backlink/normal">일반백링크관리</a>
+                                        <a href="/mgmt/auto/normal">일반자동화관리</a>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">댓글 작업관리</a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <% if(isAuthenticated){ %>
+                                            <% if(currentUser.username == 'admin'){ %>
+                                                <a href="/mgmt/comment">글 가져오기</a>
+                                                <a href="/mgmt/article/comment">댓글 html</a>
+                                            <% } %>
+                                        <% } %>
+                                        <a href="/mgmt/backlink/comment">댓글백링크관리</a>
+                                        <a href="/mgmt/auto/comment">댓글자동화관리</a>
+                                    </ul>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">이미지 작업관리</a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <% if(isAuthenticated){ %>
+                                            <% if(currentUser.username == 'admin'){ %>
+                                                <a href="/mgmt/image">글 가져오기</a>
+                                                <a href="/mgmt/article/image">이미지 html</a>
+                                                <a href="/mgmt/crawling/image">크롤링관리</a>
+                                            <% } %>
+                                        <% } %>
+                                        <a href="/mgmt/backlink/image">이미지백링크관리</a>
+                                        <a href="/mgmt/auto/image">이미지자동화관리</a>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">구독 작업관리</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a href="/mgmt/wincher/subscription">윈처(Wincher)</a>
+                                <a href="/mgmt/sitemap/subscription">사이트맵(Pro-sitemap)</a>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">색인 작업관리</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a href="/mgmt/indexed">색인 작업관리</a>
+                                <a href="/mgmt/comment/backlink/indexed">색인(댓글) 백링크관리</a>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav ml-auto">
+                        <% if(isAuthenticated){ %>
+                            <li class="nav-item"><a href="/users/<%= currentUser.username %>" class="nav-link">My Account</a></li>
+                            <li class="nav-item"><a href="/logout" class="nav-link">Logout</a></li>
+                        <% } else { %>
+                            <li class="nav-item"><a href="/login" class="nav-link">Login</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <div id="cover-spin"></div>
+</div>

@@ -7,8 +7,16 @@
     <title>Welcome</title>
 </head>
 <body>
-    <p>test!!!</p>
-    <%= JSON.stringify(test) %>
-    <%= test['abc'] %>
+    <div class="login-page">
+        <div class="form">
+            <% if(currentUser?.username) { %>
+                <%= currentUser?.username %> <a href="/logout">Logout</a>
+            <% } else { %>
+                <a href="/login">Login</a>
+            <% } %>
+            
+        </div>
+    </div>
 </body>
+
 </html>
