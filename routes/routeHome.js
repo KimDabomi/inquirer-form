@@ -17,17 +17,27 @@ router.get('/login', async function (req, res) {
     if(req.session.passport) {
         res.redirect('/');
     }
+    
+
+    const errors = req.flash('errors')[0] || {};
+
+    // const info = req.flash('info')[0];
+    // console.log('login get info', info);
+    const info = req.flash('info')[0] || {};
+    console.log('login get info2', info);
+    
     res.render('login', {
-        
-        test: { "abc": "mart" }
+        info: info,
+        errors: errors
     });
 });
 
 // Post Login
 router.post('/login', function (req, res, next) {
         const errors = {};
+        const info = {username:req.body.username, password:req.body.password};
         let isValid = true;
-        console.log(req.body);
+        console.log('login post', req.body);
         if (!req.body.username) {
             isValid = false;
             errors.username = 'Username is required!';
@@ -41,6 +51,9 @@ router.post('/login', function (req, res, next) {
             next();
         } else {
             req.flash('errors', errors);
+            req.flash('info', info);
+            console.log('post info', info);
+            console.log(errors);
             res.redirect('/login');
         }
     },

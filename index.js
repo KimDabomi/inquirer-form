@@ -7,6 +7,7 @@ const util = require('./common/util');
 const session = require('express-session');
 const passport = require('./config/passport');
 const MongoStore = require('connect-mongo');
+const methodOverride = require('method-override');
 
 
 const app = express();
@@ -27,6 +28,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(methodOverride('_method'));
 app.use(flash());
 
 // session,
