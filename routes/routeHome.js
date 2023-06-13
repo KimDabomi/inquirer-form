@@ -18,6 +18,7 @@ router.get('/login', async function (req, res) {
         res.redirect('/');
     }
     res.render('login', {
+        
         test: { "abc": "mart" }
     });
 });
@@ -64,21 +65,41 @@ router.get('/register', function(req, res){
     });
 });
 
-router.post('/register', function(req,res) {
+router.post('/register', async function(req,res) {
     const { username, password, name, passwordConfirmation  } = req.body;
-    modelUsers.create({
-        username: username,
-        password: password,
-        name: name,
-        passwordConfirmation: passwordConfirmation
-    }).then(() => {
-        passport.authenticate('local-login', {
-            successRedirect: '/',
-            failureRedirect: '/login'
+    try {
+        const oResult = await modelUsers.create({
+            username: username,
+            password: password,
+            name: name,
+            passwordConfirmation: passwordConfirmation
         });
-        res.status(200).redirect('/login');
-    })
-    .catch((error) => {
-        res.status(500).send({ message: '에러가 발생했습니다: ' + error.message });
-    });
+        console.log('oResult', oResult);
+        if(oResult) {
+            res.json({
+                register: true
+            });
+        }    
+    } catch (error) {
+        res.json({ 
+            register: false,
+            message: '에러가 발생했습니다: ' + error.message 
+        });
+    }
+    
+    // modelUsers.create({
+    //     username: username,
+    //     password: password,
+    //     name: name,
+    //     passwordConfirmation: passwordConfirmation
+    // }).then(() => {
+    //     passport.authenticate('local-login', {
+    //         successRedirect: '/',
+    //         failureRedirect: '/login'
+    //     });
+    //     res.status(200).redirect('/login');
+    // })
+    // .catch((error) => {
+    //     res.status(500).send({ message: '에러가 발생했습니다: ' + error.message });
+    // });
 });
