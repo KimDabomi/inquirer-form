@@ -6,9 +6,9 @@ const modelUsers = require('../models/modelUsers');
 
 // Home
 router.get('/', function(req, res, next) {
-    modelUsers.getAllUsernames()
-      .then(usernames => {
-        res.render('welcome', { usernames: usernames });
+    modelUsers.getAllUsers()
+      .then(users => {
+        res.render('welcome', { users: users });
       })
       .catch(err => {
         console.log(err);

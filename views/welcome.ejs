@@ -13,7 +13,7 @@
                 <h1><%= currentUser?.username %> 님 환영합니다 :D</h1><br />
                 <a href="/logout">로그아웃</a>
                 <ul>
-                    <% usernames?.forEach(function(username){ %>
+                    <% users?.forEach(function(username){ %>
                         <li><%= username %></li>
                     <% }); %>
                 </ul>

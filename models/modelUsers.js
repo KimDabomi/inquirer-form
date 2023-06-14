@@ -112,7 +112,7 @@ userSchema.methods.authenticate = function (password) {
 
 
 // 0614
-userSchema.statics.getAllUsernames = function() {
+userSchema.statics.getAllUsers = function() {
   return this.find({}, 'username')
     .then(users => users.map(user => user.username))
     .catch(err => {
