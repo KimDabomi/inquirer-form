@@ -99,11 +99,32 @@ userSchema.pre('save', function (next){
   }
 });
 
+
+
+
 // model methods
 userSchema.methods.authenticate = function (password) {
   const user = this;
   return bcrypt.compareSync(password,user.password);
 };
+
+
+
+
+// 0614
+userSchema.statics.getAllUsernames = function() {
+  return this.find({}, 'username')
+    .then(users => users.map(user => user.username))
+    .catch(err => {
+      throw err;
+    });
+};
+
+
+
+
+
+
 
 // model & export
 const modelUser = mongoose.model('t_users',userSchema);

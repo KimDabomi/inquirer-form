@@ -10,7 +10,13 @@
     <div class="login-page">
         <div class="form">
             <% if(currentUser?.username) { %>
-                <%= currentUser?.username %> <a href="/logout">로그아웃</a>
+                <h1><%= currentUser?.username %> 님 환영합니다 :D</h1><br />
+                <a href="/logout">로그아웃</a>
+                <ul>
+                    <% usernames?.forEach(function(username){ %>
+                        <li><%= username %></li>
+                    <% }); %>
+                </ul>
             <% } else { %>
                 <a href="/register">회원가입</a>
                 <a href="/login">로그인</a>

@@ -5,11 +5,16 @@ const passport = require('passport');
 const modelUsers = require('../models/modelUsers');
 
 // Home
-router.get('/', async function (req, res) {
-    res.render('welcome', {
-        test: {"abc" : "mart"}
-    });
-});
+router.get('/', function(req, res, next) {
+    modelUsers.getAllUsernames()
+      .then(usernames => {
+        res.render('welcome', { usernames: usernames });
+      })
+      .catch(err => {
+        console.log(err);
+        next(err); 
+      });
+  });
 
 
 // login
@@ -24,7 +29,7 @@ router.get('/login', async function (req, res) {
     // const info = req.flash('info')[0];
     // console.log('login get info', info);
     const info = req.flash('info')[0] || {};
-    console.log('login get info2', info);
+    console.log('login get info', info);
     
     res.render('login', {
         info: info,
