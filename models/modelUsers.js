@@ -111,7 +111,7 @@ userSchema.methods.authenticate = function (password) {
 
 
 
-// 0614
+// All users find
 userSchema.statics.getAllUsers = function() {
   return this.find({}, 'username')
     .then(users => users.map(user => user.username))
