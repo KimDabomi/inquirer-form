@@ -12,9 +12,16 @@
             <% if(currentUser?.username) { %>
                 <h1><%= currentUser?.username %> 님 환영합니다 :D</h1><br />
                 <a href="/logout">로그아웃</a>
+                <h2>MongoDB</h2>
                 <ul>
-                    <% users?.forEach(function(username){ %>
+                    <% aUsers?.forEach(function(username){ %>
                         <li><%= username %></li>
+                    <% }); %>
+                </ul>
+                <h2>MariaDB</h2>
+                <ul>
+                    <% aInquirer?.forEach(function(oInquirer){ %>
+                        <li><%= oInquirer['type'] %> // <%= oInquirer['name'] %>  //  <%= oInquirer['phone'] %>  //  <%= oInquirer['url'] %></li>
                     <% }); %>
                 </ul>
             <% } else { %>

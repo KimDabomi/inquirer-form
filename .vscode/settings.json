@@ -1,0 +1,29 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "158.247.225.228",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "robotxt",
+            "database": "htbstmvket",
+            "username": "htbstmvket",
+            "askForPassword": true
+        },
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "158.247.236.132",
+            "port": 3306,
+            "driver": "MariaDB",
+            "name": "ksamh",
+            "database": "rwxaubrmvx",
+            "username": "rwxaubrmvx"
+        }
+    ]
+}
