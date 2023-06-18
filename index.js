@@ -61,7 +61,6 @@ app.use(function (req, res, next) {
 // Routes
 app.use('/', require('./routes/routeHome'));
 
-
 // error
 app.use(function (req, res, next) {
     res.status(400).render('error/404');

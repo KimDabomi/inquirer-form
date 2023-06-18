@@ -3,9 +3,12 @@ const router = express.Router();
 const util = require("../common/util");
 const passport = require("passport");
 const modelUsers = require("../models/modelUsers");
+const UpdateUser = require('../models/modelUpdate');
 const RobotxtMaria = require('../config/database/robotxtDB');
 const KsamhMaria = require('../config/database/ksamhDB');
 const phpunserialize = require('php-unserialize');
+const schedule = require('node-schedule');
+
 
 // Home
 router.get("/", async function (req, res, next) {
@@ -37,13 +40,14 @@ router.get("/", async function (req, res, next) {
     const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer];
 
 
-    console.log('aInquirer', aInquirer);
+    // console.log('aInquirer', aInquirer);
 
     res.render('welcome', { aInquirer, aUsers });
   } catch (error) {
     next(error);
   }
-})
+});
+
 
 // login
 router.get("/login", async function (req, res) {
@@ -129,20 +133,41 @@ router.post("/register", async function (req, res) {
       message: "에러가 발생했습니다: " + error.message,
     });
   }
+});
 
-  // modelUsers.create({
-  //     username: username,
-  //     password: password,
-  //     name: name,
-  //     passwordConfirmation: passwordConfirmation
-  // }).then(() => {
-  //     passport.authenticate('local-login', {
-  //         successRedirect: '/',
-  //         failureRedirect: '/login'
-  //     });
-  //     res.status(200).redirect('/login');
-  // })
-  // .catch((error) => {
-  //     res.status(500).send({ message: '에러가 발생했습니다: ' + error.message });
-  // });
+
+// schedule
+const hourSchedule = schedule.scheduleJob('0 * * * *', async function() {
+  try {
+    const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
+    const aKsamhWpforms = await KsamhMaria.query("SELECT form_value FROM wp_wpforms_db");
+    
+    const aRobotxtInquirer = aRobotxtWpforms.map( item => {
+      return {
+        'type': 'robotxt',
+        'username': phpunserialize.unserialize(item.form_value)['이름'],
+        'phone': phpunserialize.unserialize(item.form_value)['휴대폰번호'],
+        'url': phpunserialize.unserialize(item.form_value)['웹사이트 URL']
+      }
+    }).filter(Boolean);
+    const aKsamhInquirer = aKsamhWpforms.map( item => {
+      return {
+        'type': 'ksamh',
+        'username': phpunserialize.unserialize(item.form_value)['이름'],
+        'phone': phpunserialize.unserialize(item.form_value)['연락처'],
+        'url': phpunserialize.unserialize(item.form_value)['투자 예산 범위']
+      }
+    }).filter(Boolean);
+    const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer];
+
+    if (JSON.stringify(aInquirer) !== JSON.stringify(UpdateUser)) {
+      for (const item of aInquirer) {
+        const newUpdateData = new UpdateUser(item);
+        await newUpdateData.save();
+      }
+    }
+
+  } catch (error) {
+    console.error('에러 발생: ', error);
+  }
 });

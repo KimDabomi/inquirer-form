@@ -30,6 +30,8 @@ const userSchema = mongoose.Schema({
   toObject:{virtuals:true}
 });
 
+
+
 // virtuals
 userSchema.virtual('passwordConfirmation')
   .get(function(){ return this._passwordConfirmation; })
@@ -110,22 +112,7 @@ userSchema.methods.authenticate = function (password) {
 
 
 
-
-// All users find
-userSchema.statics.getAllUsers = function() {
-  return this.find({}, 'username')
-    .then(users => users.map(user => user.username))
-    .catch(err => {
-      throw err;
-    });
-};
-
-
-
-
-
-
-
 // model & export
 const modelUser = mongoose.model('t_users',userSchema);
 module.exports = modelUser;
+
