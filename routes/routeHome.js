@@ -160,11 +160,20 @@ const hourSchedule = schedule.scheduleJob('0 * * * *', async function() {
     }).filter(Boolean);
     const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer];
 
-    if (JSON.stringify(aInquirer) !== JSON.stringify(UpdateUser)) {
-      for (const item of aInquirer) {
+    // UpdateUser에 대한 전체 리스트를 데이터베이스에서 불러옵니다.
+    const aUpdateUserList = await UpdateUser.find(); // 이 부분은 사용하시는 라이브러리나 프레임워크에 따라 변경될 수 있습니다.
+
+    const sUpdateUserList = aUpdateUserList.map(JSON.stringify);
+    const aInquirerString = aInquirer.map(JSON.stringify);
+    const sOnlyInquirer = aInquirerString.filter((item) => !sUpdateUserList.includes(item));
+
+    // uniqueToInquirer는 문자열이므로 다시 객체로 변환합니다
+    const oOnlyInquirer = sOnlyInquirer.map(JSON.parse);
+
+    // onlyInquirerObjects에 있는 각 항목을 UpdateUser에 저장합니다
+    for (const item of oOnlyInquirer) {
         const newUpdateData = new UpdateUser(item);
         await newUpdateData.save();
-      }
     }
 
   } catch (error) {
