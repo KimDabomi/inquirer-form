@@ -34,8 +34,8 @@ class Maria {
             if(conn) {
                 conn.release();
             }
-            console.log(`[Maria][query][${sql}][conn][${JSON.stringify(conn)}][rows][${JSON.stringify(rows)}]`);
-            console.log(`[Maria][TotalConnections][${this.pool.totalConnections()}][ActiveConnections][${this.pool.activeConnections()}][IdleConnections][${this.pool.idleConnections()}]`)
+            // console.log(`[Maria][query][${sql}][conn][${JSON.stringify(conn)}][rows][${JSON.stringify(rows)}]`);
+            // console.log(`[Maria][TotalConnections][${this.pool.totalConnections()}][ActiveConnections][${this.pool.activeConnections()}][IdleConnections][${this.pool.idleConnections()}]`)
             return rows;
         }
     }
