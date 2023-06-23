@@ -1,20 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const util = require("../common/util");
 const passport = require("passport");
-const modelUsers = require("../models/modelUsers");
-const UpdateUser = require('../models/modelUpdate');
+const modelInquirer = require("../models/modelInquirer");
 const RobotxtMaria = require('../config/database/robotxtDB');
 const KsamhMaria = require('../config/database/ksamhDB');
 const phpunserialize = require('php-unserialize');
-const schedule = require('node-schedule');
+
 
 
 // Home
 router.get("/", async function (req, res, next) {
   try {
     // mongodb db users 리스트 가져오기
-    const aUsers = (await modelUsers.find()).map(oUser => oUser.username);
+    const aUsers = (await modelInquirer.find()).map(oUser => {
+      return {
+        'name': oUser.username,
+        'phone': oUser.phone
+      }
+    });
 
     //robotxt db wp_wpforms_db 리스트 가져오기
     const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
@@ -43,6 +46,9 @@ router.get("/", async function (req, res, next) {
     // console.log('aInquirer', aInquirer);
 
     res.render('welcome', { aInquirer, aUsers });
+
+
+
   } catch (error) {
     next(error);
   }
@@ -134,88 +140,4 @@ router.post("/register", async function (req, res) {
     });
   }
 });
-
-router.get("/", async function (req, res, next) {
-  try {
-    // mongodb db users 리스트 가져오기
-    const aUsers = (await modelUsers.find()).map(oUser => oUser.username);
-
-    //robotxt db wp_wpforms_db 리스트 가져오기
-    const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
-    const aKsamhWpforms = await KsamhMaria.query("SELECT form_value FROM wp_wpforms_db");
-
-
-    const aRobotxtInquirer = aRobotxtWpforms.map(item => {
-      return {
-        'type': 'robotxt',
-        'name': phpunserialize.unserialize(item.form_value)['이름'],
-        'phone': phpunserialize.unserialize(item.form_value)['휴대폰번호'],
-        'url': phpunserialize.unserialize(item.form_value)['웹사이트 URL']
-      }
-    }).filter(Boolean);
-    const aKsamhInquirer = aKsamhWpforms.map(item => {
-      return {
-        'type': 'ksamh',
-        'name': phpunserialize.unserialize(item.form_value)['이름'],
-        'phone': phpunserialize.unserialize(item.form_value)['연락처'],
-        'url': phpunserialize.unserialize(item.form_value)['투자 예산 범위']
-      }
-    }).filter(Boolean);
-    const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer];
-
-
-    console.log('aInquirer', aInquirer);
-
-    res.render('welcome', { aInquirer, aUsers });
-
-
-    // schedule
-    const hourSchedule = schedule.scheduleJob('0 * * * *', async function () {
-      try {
-        const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
-        const aKsamhWpforms = await KsamhMaria.query("SELECT form_value FROM wp_wpforms_db");
-
-
-        const aRobotxtInquirer = aRobotxtWpforms.map(item => {
-          return {
-            'type': 'robotxt',
-            'name': phpunserialize.unserialize(item.form_value)['이름'],
-            'phone': phpunserialize.unserialize(item.form_value)['휴대폰번호'],
-            'url': phpunserialize.unserialize(item.form_value)['웹사이트 URL']
-          }
-        }).filter(Boolean);
-        const aKsamhInquirer = aKsamhWpforms.map(item => {
-          return {
-            'type': 'ksamh',
-            'name': phpunserialize.unserialize(item.form_value)['이름'],
-            'phone': phpunserialize.unserialize(item.form_value)['연락처'],
-            'url': phpunserialize.unserialize(item.form_value)['투자 예산 범위']
-          }
-        }).filter(Boolean);
-        const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer];
-
-        // UpdateUser에 대한 전체 리스트를 데이터베이스에서 불러옵니다.
-        const aUpdateUserList = await UpdateUser.find(); // 이 부분은 사용하시는 라이브러리나 프레임워크에 따라 변경될 수 있습니다.
-
-        const sUpdateUserList = aUpdateUserList.map(JSON.stringify);
-        const aInquirerString = aInquirer.map(JSON.stringify);
-        const sOnlyInquirer = aInquirerString.filter((item) => !sUpdateUserList.includes(item));
-
-        // uniqueToInquirer는 문자열이므로 다시 객체로 변환합니다
-        const oOnlyInquirer = sOnlyInquirer.map(JSON.parse);
-
-        // onlyInquirerObjects에 있는 각 항목을 UpdateUser에 저장합니다
-        for (const item of oOnlyInquirer) {
-          const newUpdateData = new UpdateUser(item);
-          await newUpdateData.save();
-        }
-
-      } catch (error) {
-        console.error('에러 발생: ', error);
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-})
 

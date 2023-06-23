@@ -8,6 +8,11 @@ const session = require('express-session');
 const passport = require('./config/passport');
 const MongoStore = require('connect-mongo');
 const methodOverride = require('method-override');
+const InquirerList = require('./models/modelInquirer');
+const RobotxtMaria = require('./config/database/robotxtDB');
+const KsamhMaria = require('./config/database/ksamhDB');
+const phpunserialize = require('php-unserialize');
+const schedule = require('node-schedule');
 
 
 const app = express();
@@ -16,6 +21,52 @@ mongoose.connect('mongodb+srv://cdabomi60:cdabomi60@cluster0.gtjcyjz.mongodb.net
 const db = mongoose.connection;
 db.once('open', function () {
     console.log('DB 연결됨');
+
+    // schedule
+    const hourSchedule = schedule.scheduleJob('0 * * * *', async function () {
+        try {
+          
+          const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
+          const aKsamhWpforms = await KsamhMaria.query("SELECT form_value FROM wp_wpforms_db");
+          
+
+          const aRobotxtInquirer = aRobotxtWpforms.map(item => {
+            return {
+              'type': 'robotxt',
+              'username': phpunserialize.unserialize(item.form_value)['이름'],
+              'phone': phpunserialize.unserialize(item.form_value)['휴대폰번호'],
+              'url': phpunserialize.unserialize(item.form_value)['웹사이트 URL']
+            }
+          }).filter(Boolean);
+        
+          const aKsamhInquirer = aKsamhWpforms.map(item => {
+            return {
+              'type': 'ksamh',
+              'username': phpunserialize.unserialize(item.form_value)['이름'],
+              'phone': phpunserialize.unserialize(item.form_value)['연락처'],
+              'url': phpunserialize.unserialize(item.form_value)['투자 예산 범위']
+            }
+          }).filter(Boolean);
+
+          const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer];
+          const aNewInquirer = await InquirerList.find();
+
+          let aOnlyInquirer = aInquirer.filter(oInquirer => !aNewInquirer.some(oNewInquirer => oNewInquirer.phone === oInquirer.phone));
+          if(aOnlyInquirer) {
+            //알람 처리....
+            
+          }
+          console.log('aOnlyInquirer',aInquirer.length, aNewInquirer.length, aOnlyInquirer.length );
+          for (const item of aOnlyInquirer) {
+            const newUpdateData = new InquirerList(item);
+            await newUpdateData.save();
+          }
+  
+        } catch (error) {
+          console.error('에러 발생: ', error);
+        }
+      });
+
 });
 
 db.on('error', function (err) {

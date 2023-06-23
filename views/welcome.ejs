@@ -14,8 +14,8 @@
                 <a href="/logout">로그아웃</a>
                 <h2>MongoDB</h2>
                 <ul>
-                    <% aUsers?.forEach(function(username){ %>
-                        <li><%= username %></li>
+                    <% aUsers?.forEach(function(oUser){ %>
+                        <li><%= oUser.name %> // <%= oUser.phone %></li>
                     <% }); %>
                 </ul>
                 <h2>MariaDB</h2>
