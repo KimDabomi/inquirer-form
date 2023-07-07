@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
 require('dotenv').config();
-const util = require('./common/util');
+const util = require('./util');
 const session = require('express-session');
 const passport = require('./config/passport');
 const MongoStore = require('connect-mongo');
@@ -14,10 +14,9 @@ const KsamhMaria = require('./config/database/ksamhDB');
 const HotpayMaria = require('./config/database/hotpayDB');
 const phpunserialize = require('php-unserialize');
 const schedule = require('node-schedule');
-const axios = require('axios');
-
-
+const constants = require('./constants');
 const app = express();
+
 
 mongoose.connect('mongodb+srv://cdabomi60:cdabomi60@cluster0.gtjcyjz.mongodb.net/calllink_admin?retryWrites=true&w=majority');
 const db = mongoose.connection;
@@ -25,7 +24,7 @@ db.once('open', function () {
     console.log('DB 연결됨');
 
     // schedule
-    const hourSchedule = schedule.scheduleJob('*/1 * * * * *', async function () {
+    const hourSchedule = schedule.scheduleJob('0 * * * *', async function () {
         try {
           
           const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
@@ -62,10 +61,12 @@ db.once('open', function () {
           const aNewInquirer = await InquirerList.find();
 
           let aOnlyInquirer = aInquirer.filter(oInquirer => !aNewInquirer.some(oNewInquirer => oNewInquirer.phone === oInquirer.phone));
-
-          console.log('msg',`Type: ${aOnlyInquirer.type} - Name: ${aOnlyInquirer.name} - Phone: ${aOnlyInquirer.phone}`);      
           if(aOnlyInquirer) {
-            
+            let sMessage = '';
+            for (i=0; i<aOnlyInquirer.length; i++) {
+              sMessage += `새로운 문의가 있습니다.\n 사이트 : ${aOnlyInquirer[i].type}\n 이름 : ${aOnlyInquirer[i].username}\n 연락처 : ${aOnlyInquirer[i].phone}\n\n`;
+            }
+            await util.sendTelegram(sMessage, constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
           }
           console.log('aOnlyInquirer',aInquirer.length, aNewInquirer.length, aOnlyInquirer.length );
           for (const item of aOnlyInquirer) {
@@ -77,29 +78,6 @@ db.once('open', function () {
           console.error('에러 발생: ', error);
         }
     });
-
-    async function sendKakaoNotification(aOnlyInquirer) {
-      const token = "4a94bc60cf1dcf808582a882df34cd3e";
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      };
-    
-      const message = {
-        "템플릿 코드": "DB_update",
-        "수신자 휴대폰번호": inquiry.phone,
-        "메시지 내용": `새로운 문의가 있습니다. Type: ${aOnlyInquirer.type} - Name: ${aOnlyInquirer.name} - Phone: ${aOnlyInquirer.phone}`,
-      };
-    
-      const response = await axios.post('https://kapi.kakao.com/v2/api/talk/memo/default/send', query.stringify(message), { headers: headers });
-    
-      if (response.data.result_code === 0) {
-        console.log('Kakao notification sent successfully.');
-      } else {
-        console.error('Failed to send Kakao notification:', response.data);
-      }
-    }
-    
 
 });
 
