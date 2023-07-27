@@ -9,6 +9,7 @@ const passport = require('./config/passport');
 const MongoStore = require('connect-mongo');
 const methodOverride = require('method-override');
 const InquirerList = require('./models/modelInquirer');
+const HotpayOrderList = require('./models/modelHotpayOrder');
 const RobotxtMaria = require('./config/database/robotxtDB');
 const KsamhMaria = require('./config/database/ksamhDB');
 const HotpayMaria = require('./config/database/hotpayDB');
@@ -78,6 +79,40 @@ db.once('open', function () {
           console.error('에러 발생: ', error);
         }
     });
+
+    const minuteSchedule = schedule.scheduleJob('*/1 * * * * *', async function () {
+      try {
+
+        const aHotpayOrderItems = await HotpayMaria.query("SELECT * FROM wp_woocommerce_order_items");
+        const aHotpayOrder = aHotpayOrderItems.map(item => {
+          return {
+            'type': 'hotpay',
+            'id': item.order_item_id,
+            'item': item.order_item_name
+          }
+        }).filter(Boolean);
+
+        const aOrder = [...aHotpayOrder];
+        const aNewOrder = await HotpayOrderList.find();
+        let aOnlyOrder = aOrder.filter(oOrder => !aNewOrder.filter(oNewOrder => oNewOrder.id === oOrder.id));
+        console.log('aOnlyOrder',aOnlyOrder);
+        // if(aOnlyOrder) {
+        //   let sMessage = '';
+        //   for (i=0; i<aOnlyOrder.length; i++) {
+        //     sMessage += `주문이 발생했습니다. \n 사이트 : ${aOnlyOrder[i].type}\n 제품 : ${aOnlyOrder[i].item}\n\n`;
+        //   }
+        //   await util.sendTelegram(sMessage, constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
+        // }
+        console.log('aOnlyOrder',aOrder.length, aNewOrder.length, aOnlyOrder.length );
+        for (const item of aOnlyOrder) {
+          const newUpdateOrder = new HotpayOrderList(item);
+          await newUpdateOrder.save();
+        }
+
+      } catch (error) {
+        console.error('에러 발생: ', error);
+      }
+  });
 
 });
 
