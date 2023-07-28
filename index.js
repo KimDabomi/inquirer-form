@@ -9,7 +9,7 @@ const passport = require('./config/passport');
 const MongoStore = require('connect-mongo');
 const methodOverride = require('method-override');
 const InquirerList = require('./models/modelInquirer');
-const HotpayOrderList = require('./models/modelHotpayOrder');
+const OrderList = require('./models/modelOrder');
 const RobotxtMaria = require('./config/database/robotxtDB');
 const KsamhMaria = require('./config/database/ksamhDB');
 const HotpayMaria = require('./config/database/hotpayDB');
@@ -25,7 +25,7 @@ db.once('open', function () {
     console.log('DB 연결됨');
 
     // schedule
-    const hourSchedule = schedule.scheduleJob('0 * * * *', async function () {
+    const hourSchedule = schedule.scheduleJob('0 */15 * * * *', async function () {
         try {
           
           const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
@@ -80,35 +80,32 @@ db.once('open', function () {
         }
     });
 
-    const minuteSchedule = schedule.scheduleJob('*/1 * * * * *', async function () {
+    const minuteSchedule = schedule.scheduleJob('0 */5 * * * *', async function () {
       try {
 
-        const aHotpayOrderItems = await HotpayMaria.query("SELECT * FROM wp_woocommerce_order_items");
+        const aHotpayOrderItems = await HotpayMaria.query("SELECT * FROM wp_woocommerce_order_items WHERE order_item_type = 'line_item'");
         const aHotpayOrder = aHotpayOrderItems.map(item => {
           return {
             'type': 'hotpay',
-            'id': item.order_item_id,
+            'id': item.order_id.toString(),
             'item': item.order_item_name
           }
         }).filter(Boolean);
-
         const aOrder = [...aHotpayOrder];
-        const aNewOrder = await HotpayOrderList.find();
-        let aOnlyOrder = aOrder.filter(oOrder => !aNewOrder.filter(oNewOrder => oNewOrder.id === oOrder.id));
-        console.log('aOnlyOrder',aOnlyOrder);
-        // if(aOnlyOrder) {
-        //   let sMessage = '';
-        //   for (i=0; i<aOnlyOrder.length; i++) {
-        //     sMessage += `주문이 발생했습니다. \n 사이트 : ${aOnlyOrder[i].type}\n 제품 : ${aOnlyOrder[i].item}\n\n`;
-        //   }
-        //   await util.sendTelegram(sMessage, constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
-        // }
+        const aNewOrder = await OrderList.find();
+        let aOnlyOrder = aOrder.filter(oOrder => !aNewOrder.some(oNewOrder => oNewOrder.id === oOrder.id));
+        if(aOnlyOrder) {
+          let sMessage = '';
+          for (i=0; i<aOnlyOrder.length; i++) {
+            sMessage += `주문이 발생했습니다. \n 사이트 : ${aOnlyOrder[i].type}\n 제품 : ${aOnlyOrder[i].item}\n\n`;
+          }
+          await util.sendTelegram(sMessage, constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
+        }
         console.log('aOnlyOrder',aOrder.length, aNewOrder.length, aOnlyOrder.length );
-        for (const item of aOnlyOrder) {
-          const newUpdateOrder = new HotpayOrderList(item);
+        for (const item of aOnlyOrder) {     
+          const newUpdateOrder = new OrderList(item);
           await newUpdateOrder.save();
         }
-
       } catch (error) {
         console.error('에러 발생: ', error);
       }

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const HotpayOrderSchema = mongoose.Schema({
+const OrderSchema = mongoose.Schema({
   type: {
     type: String
   },
@@ -17,6 +17,6 @@ const HotpayOrderSchema = mongoose.Schema({
 },{
   toObject: {virtuals:true}
 });
-const HotpayOrderList = mongoose.model('t_order_list', HotpayOrderSchema);
-module.exports = HotpayOrderList;
+const OrderList = mongoose.model('t_order_list', OrderSchema);
+module.exports = OrderList;
 
