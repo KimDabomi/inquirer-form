@@ -24,7 +24,7 @@ const db = mongoose.connection;
 db.once('open', function () {
     console.log('DB 연결됨');
 
-    // schedule
+    // 문의알림 스케줄 15분마다
     const hourSchedule = schedule.scheduleJob('0 */15 * * * *', async function () {
         try {
           
@@ -62,12 +62,15 @@ db.once('open', function () {
           const aNewInquirer = await InquirerList.find();
 
           let aOnlyInquirer = aInquirer.filter(oInquirer => !aNewInquirer.some(oNewInquirer => oNewInquirer.phone === oInquirer.phone));
+
+          // 텔레알림
           if(aOnlyInquirer) {
             let sMessage = '';
             for (i=0; i<aOnlyInquirer.length; i++) {
               sMessage += `새로운 문의가 있습니다.\n 사이트 : ${aOnlyInquirer[i].type}\n 이름 : ${aOnlyInquirer[i].username}\n 연락처 : ${aOnlyInquirer[i].phone}\n\n`;
             }
-            await util.sendTelegram(sMessage, constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
+            await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
+            await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM_GROUP);            
           }
           console.log('aOnlyInquirer',aInquirer.length, aNewInquirer.length, aOnlyInquirer.length );
           for (const item of aOnlyInquirer) {
@@ -80,6 +83,7 @@ db.once('open', function () {
         }
     });
 
+    // 주문알림 스케줄 5분마다
     const minuteSchedule = schedule.scheduleJob('0 */5 * * * *', async function () {
       try {
 
@@ -94,13 +98,17 @@ db.once('open', function () {
         const aOrder = [...aHotpayOrder];
         const aNewOrder = await OrderList.find();
         let aOnlyOrder = aOrder.filter(oOrder => !aNewOrder.some(oNewOrder => oNewOrder.id === oOrder.id));
+        
+        // 텔레알림
         if(aOnlyOrder) {
           let sMessage = '';
           for (i=0; i<aOnlyOrder.length; i++) {
             sMessage += `주문이 발생했습니다. \n 사이트 : ${aOnlyOrder[i].type}\n 제품 : ${aOnlyOrder[i].item}\n\n`;
           }
-          await util.sendTelegram(sMessage, constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
+          await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
+          await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM_GROUP);            
         }
+
         console.log('aOnlyOrder',aOrder.length, aNewOrder.length, aOnlyOrder.length );
         for (const item of aOnlyOrder) {     
           const newUpdateOrder = new OrderList(item);
@@ -109,7 +117,7 @@ db.once('open', function () {
       } catch (error) {
         console.error('에러 발생: ', error);
       }
-  });
+    });
 
 });
 
