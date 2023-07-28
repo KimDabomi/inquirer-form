@@ -69,7 +69,6 @@ db.once('open', function () {
             for (i=0; i<aOnlyInquirer.length; i++) {
               sMessage += `새로운 문의가 있습니다.\n 사이트 : ${aOnlyInquirer[i].type}\n 이름 : ${aOnlyInquirer[i].username}\n 연락처 : ${aOnlyInquirer[i].phone}\n\n`;
             }
-            await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
             await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM_GROUP);            
           }
           console.log('aOnlyInquirer',aInquirer.length, aNewInquirer.length, aOnlyInquirer.length );
@@ -88,6 +87,7 @@ db.once('open', function () {
       try {
 
         const aHotpayOrderItems = await HotpayMaria.query("SELECT * FROM wp_woocommerce_order_items WHERE order_item_type = 'line_item'");
+        const aRobotxtOrderItems = await RobotxtMaria.query("SELECT * FROM wp_woocommerce_order_items WHERE order_item_type = 'line_item'");
         const aHotpayOrder = aHotpayOrderItems.map(item => {
           return {
             'type': 'hotpay',
@@ -95,7 +95,14 @@ db.once('open', function () {
             'item': item.order_item_name
           }
         }).filter(Boolean);
-        const aOrder = [...aHotpayOrder];
+        const aRobotxtOrder = aRobotxtOrderItems.map(item => {
+          return {
+            'type': 'robotxt',
+            'id': item.order_id.toString(),
+            'item': item.order_item_name
+          }
+        }).filter(Boolean);
+        const aOrder = [...aHotpayOrder,...aRobotxtOrder];
         const aNewOrder = await OrderList.find();
         let aOnlyOrder = aOrder.filter(oOrder => !aNewOrder.some(oNewOrder => oNewOrder.id === oOrder.id));
         
@@ -105,7 +112,6 @@ db.once('open', function () {
           for (i=0; i<aOnlyOrder.length; i++) {
             sMessage += `주문이 발생했습니다. \n 사이트 : ${aOnlyOrder[i].type}\n 제품 : ${aOnlyOrder[i].item}\n\n`;
           }
-          await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM);            
           await util.sendTelegram(sMessage,constants.TELEGRAM_CHAT_ID.CALLLINK_INQUIRER_FORM_GROUP);            
         }
 
