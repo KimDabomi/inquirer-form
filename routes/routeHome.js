@@ -3,7 +3,6 @@ const router = express.Router();
 const passport = require("passport");
 const modelInquirer = require("../models/modelInquirer");
 const RobotxtMaria = require('../config/database/robotxtDB');
-const KsamhMaria = require('../config/database/ksamhDB');
 const HotpayMaria = require('../config/database/hotpayDB');
 const phpunserialize = require('php-unserialize');
 
@@ -22,7 +21,6 @@ router.get("/", async function (req, res, next) {
 
     //robotxt db wp_wpforms_db 리스트 가져오기
     const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
-    const aKsamhWpforms = await KsamhMaria.query("SELECT form_value FROM wp_wpforms_db");
     const aHotpayWpforms = await HotpayMaria.query("SELECT form_value FROM wp_wpforms_db");
 
 
@@ -34,14 +32,7 @@ router.get("/", async function (req, res, next) {
         'url': phpunserialize.unserialize(item.form_value)['웹사이트 URL']
       }
     }).filter(Boolean);
-    const aKsamhInquirer = aKsamhWpforms.map(item => {
-      return {
-        'type': 'ksamh',
-        'name': phpunserialize.unserialize(item.form_value)['이름'],
-        'phone': phpunserialize.unserialize(item.form_value)['연락처'],
-        'url': phpunserialize.unserialize(item.form_value)['투자 예산 범위']
-      }
-    }).filter(Boolean);
+
     const aHotpayInquirer = aHotpayWpforms.map(item => {
       return {
         'type': 'hotpay',
@@ -51,7 +42,7 @@ router.get("/", async function (req, res, next) {
       }
     }).filter(Boolean);
 
-    const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer, ...aHotpayInquirer];
+    const aInquirer = [...aRobotxtInquirer, ...aHotpayInquirer];
 
 
     // console.log('aInquirer', aInquirer);

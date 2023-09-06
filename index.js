@@ -11,7 +11,6 @@ const methodOverride = require('method-override');
 const InquirerList = require('./models/modelInquirer');
 const OrderList = require('./models/modelOrder');
 const RobotxtMaria = require('./config/database/robotxtDB');
-const KsamhMaria = require('./config/database/ksamhDB');
 const HotpayMaria = require('./config/database/hotpayDB');
 const phpunserialize = require('php-unserialize');
 const schedule = require('node-schedule');
@@ -29,7 +28,6 @@ db.once('open', function () {
         try {
           
           const aRobotxtWpforms = await RobotxtMaria.query("SELECT form_value FROM wp_wpforms_db");
-          const aKsamhWpforms = await KsamhMaria.query("SELECT form_value FROM wp_wpforms_db");
           const aHotpayWpforms = await HotpayMaria.query("SELECT form_value FROM wp_wpforms_db");
 
           const aRobotxtInquirer = aRobotxtWpforms.map(item => {
@@ -41,14 +39,6 @@ db.once('open', function () {
             }
           }).filter(Boolean);
         
-          const aKsamhInquirer = aKsamhWpforms.map(item => {
-            return {
-              'type': 'ksamh',
-              'username': phpunserialize.unserialize(item.form_value)['이름'],
-              'phone': phpunserialize.unserialize(item.form_value)['연락처'],
-              'url': phpunserialize.unserialize(item.form_value)['투자 예산 범위']
-            }
-          }).filter(Boolean);
           const aHotpayInquirer = aHotpayWpforms.map(item => {
             return {
               'type': 'hotpay',
@@ -58,7 +48,7 @@ db.once('open', function () {
             }
           }).filter(Boolean);
 
-          const aInquirer = [...aRobotxtInquirer, ...aKsamhInquirer, ...aHotpayInquirer];
+          const aInquirer = [...aRobotxtInquirer, ...aHotpayInquirer];
           const aNewInquirer = await InquirerList.find();
 
           let aOnlyInquirer = aInquirer.filter(oInquirer => !aNewInquirer.some(oNewInquirer => oNewInquirer.phone === oInquirer.phone));
